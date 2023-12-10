@@ -1,0 +1,49 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: landingpage-prod
+  namespace: production
+spec:
+  #replicas: 3
+  selector:
+    matchLabels:
+      name: landingpage-prod
+  template:
+    metadata:
+      labels:
+        name: landingpage-prod
+    spec:
+      containers:
+      - name: landingpage-prod
+        image: coolninja/landingpage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: landingpage-prod
+  namespace: production
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+  selector:
+    name: landingpage-prod
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: landingpage-ingress
+  namespace: production
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+    - host: donorplasma.id
+      http:
+        paths:
+          #- path: /belajar
+          - backend:
+              serviceName: landingpage-prod
+              servicePort: 80
